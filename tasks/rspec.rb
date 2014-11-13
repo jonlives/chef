@@ -27,22 +27,12 @@ begin
 
   task :default => :spec
 
-  desc "Run all specs in spec directory"
+  desc "Run standard specs (minus long running specs)"
   RSpec::Core::RakeTask.new(:spec) do |t|
     t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/.rspec\""]
-    t.pattern = FileList['spec/**/*_spec.rb']
-  end
-
-  desc "Run all functional specs (in functional/ directory)"
-  RSpec::Core::RakeTask.new(:functional) do |t|
-    t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/spec/spec.opts\""]
-    t.pattern = FileList['spec/functional/**/*_spec.rb']
-  end
-
-  desc "Run the rspec tests with activesupport loaded"
-  RSpec::Core::RakeTask.new(:spec_activesupport) do |t|
-    t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/.rspec\"", "--require active_support/core_ext"]
-    t.pattern = FileList['spec/unit/**/*_spec.rb']
+    # right now this just limits to functional + unit, but could also remove
+    # individual tests marked long-running
+    t.pattern = FileList['spec/{functional,unit}/**/*_spec.rb']
   end
 
   namespace :spec do
@@ -56,13 +46,25 @@ begin
       end
     end
 
+    desc "Run all specs in spec directory"
+    RSpec::Core::RakeTask.new(:all) do |t|
+      t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/.rspec\""]
+      t.pattern = FileList['spec/**/*_spec.rb']
+    end
+
     desc "Print Specdoc for all specs"
     RSpec::Core::RakeTask.new(:doc) do |t|
       t.rspec_opts = ["--format", "specdoc", "--dry-run"]
       t.pattern = FileList['spec/**/*_spec.rb']
     end
 
-    [:unit].each do |sub|
+    desc "Run the specs under spec/unit with activesupport loaded"
+    RSpec::Core::RakeTask.new(:activesupport) do |t|
+      t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/.rspec\"", "--require active_support/core_ext"]
+      t.pattern = FileList['spec/unit/**/*_spec.rb']
+    end
+
+    [:unit, :functional, :integration, :stress].each do |sub|
       desc "Run the specs under spec/#{sub}"
       RSpec::Core::RakeTask.new(sub) do |t|
         t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/spec/spec.opts\""]
