@@ -38,7 +38,7 @@ begin
   namespace :spec do
     desc "Run all specs in spec directory with RCov"
     RSpec::Core::RakeTask.new(:rcov) do |t|
-      t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/spec/spec.opts\""]
+      t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/.rspec\""]
       t.pattern = FileList['spec/**/*_spec.rb']
       t.rcov = true
       t.rcov_opts = lambda do
@@ -67,7 +67,7 @@ begin
     [:unit, :functional, :integration, :stress].each do |sub|
       desc "Run the specs under spec/#{sub}"
       RSpec::Core::RakeTask.new(sub) do |t|
-        t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/spec/spec.opts\""]
+        t.rspec_opts = ['--options', "\"#{CHEF_ROOT}/.rspec\""]
         t.pattern = FileList["spec/#{sub}/**/*_spec.rb"]
       end
     end
